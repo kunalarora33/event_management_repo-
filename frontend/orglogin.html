@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organizer Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f2f5;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <h2 id="formTitle" class="text-2xl font-bold text-center mb-6">Organizer Login</h2>
+
+    <!-- Login Form -->
+    <form id="organizerLoginForm" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+        <input type="email" id="email" name="email" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+        <input type="password" id="password" name="password" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <div id="errorMessage" class="text-red-500 text-sm text-center hidden"></div>
+      <button type="submit"
+        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+  Login
+</button>
+
+<p class="text-center text-sm text-gray-600 mt-2">
+  Don’t have an account?
+  <button type="button" id="switchToRegister" class="text-blue-600 hover:underline ml-1">
+    Register Me
+  </button>
+</p>
+
+</p>
+
+    </form>
+
+    <!-- Registration Form (hidden by default) -->
+    <form id="registerForm" class="space-y-4 hidden">
+      <div>
+        <label for="regName" class="block text-sm font-medium text-gray-700">Name:</label>
+        <input type="text" id="regName" name="name" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+      </div>
+      <div>
+        <label for="regEmail" class="block text-sm font-medium text-gray-700">Email:</label>
+        <input type="email" id="regEmail" name="email" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+      </div>
+      <div>
+        <label for="regPassword" class="block text-sm font-medium text-gray-700">Password:</label>
+        <input type="password" id="regPassword" name="password" required
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+      </div>
+      <div id="registerError" class="text-red-500 text-sm text-center hidden"></div>
+      <button type="submit"
+              class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+        Register
+      </button>
+      <button type="button" id="backToLogin"
+              class="w-full bg-gray-300 text-black py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+        Back to Login
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-gray-600 mt-4">
+      <a href="events.html" class="text-blue-600 hover:underline">Back to Event Listing</a>
+    </p>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('organizerLoginForm');
+    const registerForm = document.getElementById('registerForm');
+    const formTitle = document.getElementById('formTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    const registerError = document.getElementById('registerError');
+
+    document.getElementById('switchToRegister').addEventListener('click', () => {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      formTitle.textContent = 'Organizer Registration';
+      errorMessage.classList.add('hidden');
+    });
+
+    document.getElementById('backToLogin').addEventListener('click', () => {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      formTitle.textContent = 'Organizer Login';
+      registerError.classList.add('hidden');
+    });
+
+    loginForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          errorMessage.classList.add('hidden');
+          alert('Login successful! Redirecting...');
+          localStorage.setItem('organizerToken', data.token);
+          localStorage.setItem('organizerEmail', data.email);
+          window.location.href = 'organizerpage.html';
+        } else {
+          errorMessage.textContent = data.message || 'Login failed.';
+          errorMessage.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error(error);
+        errorMessage.textContent = 'Server error. Please try again.';
+        errorMessage.classList.remove('hidden');
+      }
+    });
+
+    registerForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          registerError.classList.add('hidden');
+          alert('Registration successful! Please login.');
+          document.getElementById('backToLogin').click();
+        } else {
+          registerError.textContent = data.message || 'Registration failed.';
+          registerError.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error(error);
+        registerError.textContent = 'Server error. Please try again.';
+        registerError.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

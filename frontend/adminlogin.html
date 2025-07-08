@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - EventHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .gradient-button {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6); 
+            transition: background-image 0.3s ease-in-out;
+        }
+        .gradient-button:hover {
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1); 
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Admin Login</h2>
+            <form id="adminLoginForm" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username" name="username" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <button type="submit"
+                        class="w-full gradient-button text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                    Login
+                </button>
+            </form>
+            <p id="loginMessage" class="mt-4 text-center text-sm text-red-600 hidden">Invalid username or password.</p>
+        </div>
+        <div class="mt-6 text-center">
+            <a href="events.html" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginMessage = document.getElementById('loginMessage');
+
+            
+            const ADMIN_USERNAME = 'admin';
+            const ADMIN_PASSWORD = 'password123';
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                
+                alert('Admin Login Successful! Redirecting to dashboard...');
+                
+                window.location.href = 'second.html';
+            } else {
+                loginMessage.textContent = 'Invalid username or password.';
+                loginMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

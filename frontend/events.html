@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Listing Page - EventHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; 
+        }
+        .event-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-button {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6); 
+            transition: background-image 0.3s ease-in-out;
+        }
+        .gradient-button:hover {
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1); 
+        }
+
+        
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+            width: 90%;
+            max-width: 500px; /* max-w-lg */
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pb-8">
+
+    <nav class="w-full bg-white shadow-md py-4 mb-8">
+        <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
+            <a href="." class="text-2xl font-bold text-gray-800">EventHub</a>
+            <div class="flex items-center space-x-4">
+                <a href="adminlogin.html" class="text-gray-600 hover:text-indigo-600 transition duration-300" title="Admin Login">
+                    <i class="fas fa-user-shield fa-xl"></i>
+                </a>
+                <a href="orglogin.html" class="gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                    Organizer Login
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="w-full max-w-4xl mx-auto text-center mb-10 px-4">
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
+            Upcoming Events
+        </h1>
+        <p class="text-xl text-gray-600">
+            Discover and register for exciting events happening around you!
+        </p>
+    </header>
+
+    <section class="w-full max-w-6xl mx-auto mb-8 px-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <input type="text" id="searchInput" placeholder="Search by title or description..."
+                   class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="categoryFilter"
+                    class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">All Categories</option>
+                </select>
+            <input type="date" id="dateFilter"
+                   class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button id="resetFilters" class="gradient-button text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                Reset
+            </button>
+        </div>
+    </section>
+
+    <div id="loadingMessage" class="text-center text-indigo-500 text-lg mt-4 hidden">Loading events...</div>
+    <div id="errorMessage" class="text-center text-red-600 text-lg mt-4 hidden">Failed to load events. Please try again later.</div>
+    <div id="noEventsFoundMessage" class="text-gray-600 text-lg col-span-full text-center mt-4 hidden">No events found matching your criteria.</div>
+
+    <main id="events-container" class="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+        </main>
+
+    <footer class="w-full max-w-4xl mx-auto text-center mt-12 py-6 text-gray-500 text-sm">
+        <p>&copy; 2025 EventHub. All rights reserved.</p>
+    </footer>
+
+    <div id="registrationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Register for Event</h2>
+            <form id="registrationForm">
+                <input type="hidden" id="modalEventId">
+                <h3 id="modalEventTitle" class="text-xl font-semibold text-gray-800 mb-4"></h3>
+
+                <div class="mb-4">
+                    <label for="attendeeName" class="block text-gray-700 text-sm font-bold mb-2">Your Name:</label>
+                    <input type="text" id="attendeeName" name="attendeeName" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="mb-6">
+                    <label for="attendeeEmail" class="block text-gray-700 text-sm font-bold mb-2">Your Email:</label>
+                    <input type="email" id="attendeeEmail" name="attendeeEmail" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div id="modalMessage" class="text-center text-sm mb-4 hidden"></div>
+
+                <button type="submit" class="gradient-button text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 w-full">
+                    Complete Registration
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        const eventsContainer = document.getElementById('events-container');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const resetFiltersButton = document.getElementById('resetFilters');
+
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const noEventsFoundMessage = document.getElementById('noEventsFoundMessage');
+
+        
+        const registrationModal = document.getElementById('registrationModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const registrationForm = document.getElementById('registrationForm');
+        const modalEventId = document.getElementById('modalEventId');
+        const modalEventTitle = document.getElementById('modalEventTitle');
+        const attendeeNameInput = document.getElementById('attendeeName');
+        const attendeeEmailInput = document.getElementById('attendeeEmail');
+        const modalMessage = document.getElementById('modalMessage');
+
+
+        let allFetchedEvents = [];
+
+        function createElement(tag, classes, content = '') {
+            const element = document.createElement(tag);
+            if (classes) {
+                element.classList.add(...classes);
+            }
+            if (content) {
+                element.textContent = content;
+            }
+            return element;
+        }
+
+        function populateCategoryFilter(events) {
+            const categories = [...new Set(events.map(event => event.category).filter(Boolean))];
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        async function fetchAndRenderEvents() {
+            loadingMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            noEventsFoundMessage.classList.add('hidden');
+            eventsContainer.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/public/events`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                allFetchedEvents = await response.json();
+                loadingMessage.classList.add('hidden');
+
+                populateCategoryFilter(allFetchedEvents);
+                renderFilteredEvents();
+            } catch (error) {
+                console.error('Failed to fetch public events:', error);
+                loadingMessage.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+        }
+
+        function renderFilteredEvents() {
+            eventsContainer.innerHTML = '';
+            noEventsFoundMessage.classList.add('hidden');
+
+            let eventsToDisplay = [...allFetchedEvents];
+
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            const selectedDate = dateFilter.value;
+
+            const filteredEvents = eventsToDisplay.filter(event => {
+                const matchesSearch = searchTerm === '' ||
+                                      event.title.toLowerCase().includes(searchTerm) ||
+                                      (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+                                      (event.location && event.location.toLowerCase().includes(searchTerm));
+
+                const matchesCategory = selectedCategory === '' || event.category === selectedCategory;
+                const matchesDate = selectedDate === '' || event.date === selectedDate;
+
+                return matchesSearch && matchesCategory && matchesDate;
+            });
+
+            if (filteredEvents.length === 0) {
+                noEventsFoundMessage.classList.remove('hidden');
+                return;
+            }
+
+            filteredEvents.forEach(event => {
+                const card = createElement('div', [
+                    'event-card', 'bg-white', 'rounded-xl', 'shadow-lg', 'overflow-hidden',
+                    'flex', 'flex-col', 'transform', 'hover:scale-102', 'duration-300'
+                ]);
+
+                const img = document.createElement('img');
+                img.src = event.imageUrl || "https://placehold.co/400x250/6366f1/ffffff?text=Event+Image";
+                img.alt = event.title;
+                img.classList.add('w-full', 'h-48', 'object-cover');
+                img.onerror = function() {
+                    this.src = "https://placehold.co/400x250/cccccc/000000?text=Image+Not+Found";
+                };
+                card.appendChild(img);
+
+                const contentDiv = createElement('div', ['p-6', 'flex-grow', 'flex', 'flex-col']);
+
+                if (event.category) {
+                    const categoryTag = createElement('span', [
+                        'inline-block', 'bg-indigo-100', 'text-indigo-800', 'text-xs',
+                        'font-semibold', 'px-2', 'py-1', 'rounded-full', 'uppercase', 'tracking-wide',
+                        'mb-2'
+                    ], event.category);
+                    contentDiv.appendChild(categoryTag);
+                }
+
+                const title = createElement('h2', ['text-2xl', 'font-bold', 'text-gray-900', 'mb-2'], event.title);
+                contentDiv.appendChild(title);
+
+                const dateTime = createElement('p', ['text-gray-600', 'text-sm', 'mb-1'], event.date + ' at ' + event.time);
+                contentDiv.appendChild(dateTime);
+
+                const location = createElement('p', ['text-gray-600', 'text-sm', 'mb-4'], event.location);
+                contentDiv.appendChild(location);
+
+                const description = createElement('p', ['text-gray-700', 'text-base', 'mb-6', 'flex-grow'], event.description || 'No description provided.');
+                contentDiv.appendChild(description);
+
+                const registerButton = createElement('button', [
+                    'gradient-button', 'text-white', 'font-semibold', 'py-3', 'px-6',
+                    'rounded-lg', 'shadow-md', 'hover:shadow-lg', 'focus:outline-none',
+                    'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-opacity-75',
+                    'self-start'
+                ], 'Register Now');
+
+                
+                registerButton.addEventListener('click', () => {
+                    openRegistrationModal(event._id, event.title);
+                });
+                contentDiv.appendChild(registerButton);
+
+                card.appendChild(contentDiv);
+                eventsContainer.appendChild(card);
+            });
+        }
+
+        
+
+        function openRegistrationModal(eventId, eventTitle) {
+            registrationModal.style.display = 'flex'; // Show the modal
+            modalEventId.value = eventId;
+            modalEventTitle.textContent = `Register for: ${eventTitle}`;
+            attendeeNameInput.value = ''; // Clear previous input
+            attendeeEmailInput.value = ''; // Clear previous input
+            modalMessage.classList.add('hidden'); // Hide any previous messages
+        }
+
+        function closeRegistrationModal() {
+            registrationModal.style.display = 'none'; // Hide the modal
+        }
+
+        // Close modal when close button is clicked
+        closeModalBtn.addEventListener('click', closeRegistrationModal);
+
+        // Close modal if user clicks outside of the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target == registrationModal) {
+                closeRegistrationModal();
+            }
+        });
+
+        // --- NEW: Handle Registration Form Submission ---
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const name = attendeeNameInput.value.trim();
+            const email = attendeeEmailInput.value.trim();
+            const eventId = modalEventId.value;
+
+            modalMessage.classList.remove('hidden');
+            modalMessage.classList.remove('text-green-600', 'text-red-600');
+            modalMessage.classList.add('text-indigo-500');
+            modalMessage.textContent = 'Registering...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendees`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, eventId }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    modalMessage.classList.remove('text-indigo-500', 'text-red-600');
+                    modalMessage.classList.add('text-green-600');
+                    modalMessage.textContent = data.message || 'Registration successful!';
+                    // Optionally close modal after a short delay
+                    setTimeout(closeRegistrationModal, 2000);
+                } else {
+                    modalMessage.classList.remove('text-indigo-500', 'text-green-600');
+                    modalMessage.classList.add('text-red-600');
+                    modalMessage.textContent = data.message || 'Registration failed. Please try again.';
+                }
+            } catch (error) {
+                console.error('Network or server error during registration:', error);
+                modalMessage.classList.remove('text-indigo-500', 'text-green-600');
+                modalMessage.classList.add('text-red-600');
+                modalMessage.textContent = 'A network error occurred. Please try again.';
+            }
+        });
+
+
+        // Event Listeners for filters
+        searchInput.addEventListener('input', renderFilteredEvents);
+        categoryFilter.addEventListener('change', renderFilteredEvents);
+        dateFilter.addEventListener('change', renderFilteredEvents);
+        resetFiltersButton.addEventListener('click', () => {
+            searchInput.value = '';
+            categoryFilter.value = '';
+            dateFilter.value = '';
+            fetchAndRenderEvents();                                                 
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchAndRenderEvents);
+    </script>
+</body>
+</html>
