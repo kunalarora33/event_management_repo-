@@ -70,7 +70,7 @@
 
     <nav class="w-full bg-white shadow-md py-4 mb-8">
         <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-            <a href="index.html" class="text-2xl font-bold text-gray-800">EventHub</a>
+            <a href="events.html" class="text-2xl font-bold text-gray-800">EventHub</a>
             <div class="flex items-center space-x-4">
                 <span id="organizerEmailDisplay" class="text-gray-700 text-lg font-medium"></span>
                 <button id="logoutButton" class="gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
@@ -116,12 +116,12 @@
                 <div class="col-span-1 md:col-span-2">
                     <label for="eventDescription" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
                     <textarea id="eventDescription" name="description" rows="4"
-                              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
                 </div>
                 <div>
                     <label for="eventCategory" class="block text-gray-700 text-sm font-bold mb-2">Category:</label>
                     <select id="eventCategory" name="category"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="">Select Category</option>
                         <option value="Technology">Technology</option>
                         <option value="Arts & Culture">Arts & Culture</option>
@@ -136,6 +136,11 @@
                     <input type="url" id="eventImageUrl" name="imageUrl"
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                            placeholder="https://example.com/image.jpg">
+                </div>
+                <div>
+                    <label for="eventFee" class="block text-gray-700 text-sm font-bold mb-2">Event Fee (in Rs..., 0 for Free):</label>
+                    <input type="number" id="eventFee" name="fee" value="0" min="0" step="0.01" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
 
                 <div class="col-span-1 md:col-span-2 flex justify-end">
@@ -191,12 +196,12 @@
                 <div class="mb-4">
                     <label for="editEventDescription" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
                     <textarea id="editEventDescription" name="description" rows="4"
-                              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
                 </div>
                 <div class="mb-4">
                     <label for="editEventCategory" class="block text-gray-700 text-sm font-bold mb-2">Category:</label>
                     <select id="editEventCategory" name="category"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="">Select Category</option>
                         <option value="Technology">Technology</option>
                         <option value="Arts & Culture">Arts & Culture</option>
@@ -206,11 +211,16 @@
                         <option value="Other">Other</option>
                     </select>
                 </div>
-                <div class="mb-6">
+                <div class="mb-4">
                     <label for="editEventImageUrl" class="block text-gray-700 text-sm font-bold mb-2">Image URL (Optional):</label>
                     <input type="url" id="editEventImageUrl" name="imageUrl"
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                            placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="mb-6">
+                    <label for="editEventFee" class="block text-gray-700 text-sm font-bold mb-2">Event Fee (in Rs..., 0 for Free):</label>
+                    <input type="number" id="editEventFee" name="fee" value="0" min="0" step="0.01" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
 
                 <div id="editMessage" class="mt-4 text-center text-sm hidden"></div>
@@ -265,6 +275,7 @@
         const editEventLocation = document.getElementById('editEventLocation');
         const editEventCategory = document.getElementById('editEventCategory');
         const editEventImageUrl = document.getElementById('editEventImageUrl');
+        const editEventFee = document.getElementById('editEventFee'); // New: Edit Event Fee element
         const editMessage = document.getElementById('editMessage');
 
         // Attendee Modal Elements
@@ -327,7 +338,8 @@
                 time: document.getElementById('eventTime').value,
                 location: document.getElementById('eventLocation').value,
                 category: document.getElementById('eventCategory').value,
-                imageUrl: document.getElementById('eventImageUrl').value
+                imageUrl: document.getElementById('eventImageUrl').value,
+                fee: parseFloat(document.getElementById('eventFee').value) // New: Get event fee
             };
 
             showMessage(createMessage, 'Creating event...', 'info');
@@ -347,6 +359,7 @@
                 if (response.ok) {
                     showMessage(createMessage, data.message || 'Event created successfully!', 'success');
                     createEventForm.reset();
+                    document.getElementById('eventFee').value = "0"; // Reset fee to 0 after creation
                     fetchAndDisplayEvents();
                 } else {
                     showMessage(createMessage, data.message || 'Failed to create event.', 'error');
@@ -401,6 +414,10 @@
                             if (event.category) {
                                 card.appendChild(createElement('span', ['inline-block', 'bg-indigo-100', 'text-indigo-800', 'text-xs', 'font-semibold', 'px-2', 'py-1', 'rounded-full', 'uppercase', 'tracking-wide', 'mb-4'], event.category));
                             }
+                            // New: Display Event Fee
+                            const feeDisplay = createElement('p', ['text-gray-700', 'text-md', 'font-bold', 'mb-4']);
+                            feeDisplay.textContent = event.fee > 0 ? `Fee: $${event.fee.toFixed(2)}` : 'Fee: Free';
+                            card.appendChild(feeDisplay);
 
 
                             const actionsDiv = createElement('div', ['flex', 'flex-col', 'gap-2', 'mt-4']);
@@ -449,6 +466,7 @@
             editEventLocation.value = event.location;
             editEventCategory.value = event.category || '';
             editEventImageUrl.value = event.imageUrl || '';
+            editEventFee.value = event.fee != null ? event.fee : 0; // New: Populate event fee, default to 0
             editMessage.classList.add('hidden');
             editEventModal.style.display = 'flex';
         }
@@ -457,6 +475,7 @@
             editEventModal.style.display = 'none';
         });
 
+        // Close modal if clicked outside
         window.addEventListener('click', (event) => {
             if (event.target == editEventModal) {
                 editEventModal.style.display = 'none';
@@ -478,7 +497,8 @@
                 time: editEventTime.value,
                 location: editEventLocation.value,
                 category: editEventCategory.value,
-                imageUrl: editEventImageUrl.value
+                imageUrl: editEventImageUrl.value,
+                fee: parseFloat(editEventFee.value) // New: Get updated event fee
             };
 
             showMessage(editMessage, 'Saving changes...', 'info');
@@ -548,6 +568,15 @@
 
             await fetchAndDisplayAttendees(eventId); // Call a dedicated function to fetch and display
         }
+
+        closeAttendeeModalBtn.addEventListener('click', closeAttendeeModal);
+
+        function closeAttendeeModal() {
+            attendeeListModal.style.display = 'none';
+            attendeesContainer.innerHTML = ''; // Clear content when closing
+            currentEventIdForAttendees = null; // Reset stored event ID
+        }
+
 
         async function fetchAndDisplayAttendees(eventId) {
             attendeesContainer.innerHTML = ''; // Clear existing list
@@ -626,27 +655,18 @@
 
                 if (response.ok) {
                     alert(data.message || 'Attendee registration deleted successfully!');
-                    // Re-fetch and display attendees for the *currently open event*
+                    // Re-fetch attendees for the *current* event displayed in the modal
                     if (currentEventIdForAttendees) {
                         await fetchAndDisplayAttendees(currentEventIdForAttendees);
                     }
                 } else {
                     alert(data.message || 'Failed to delete attendee registration.');
-                    console.error('Error deleting attendee:', data.message);
                 }
             } catch (error) {
-                console.error('Network error deleting attendee:', error);
+                console.error('Error deleting attendee:', error);
                 alert('Network error. Could not delete attendee registration.');
             }
         }
-
-
-        function closeAttendeeModal() {
-            attendeeListModal.style.display = 'none';
-            currentEventIdForAttendees = null; // Clear the stored event ID
-        }
-
-        closeAttendeeModalBtn.addEventListener('click', closeAttendeeModal);
     </script>
 </body>
 </html>
