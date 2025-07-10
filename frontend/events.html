@@ -6,143 +6,274 @@
     <title>Event Listing Page - EventHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-       
+        /* Apply Poppins font globally */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; 
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #f8fafc, #eff6ff); /* Lighter blue tint for background */
+            min-height: 100vh; /* Ensure full viewport height */
         }
+        
+        /* General card styling for consistency */
         .event-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border 0.3s ease-in-out;
+            position: relative; 
+            border: 2px solid transparent; /* For hover effect */
         }
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        .gradient-button {
-            background-image: linear-gradient(to right, #6366f1, #8b5cf6); 
-            transition: background-image 0.3s ease-in-out;
-        }
-        .gradient-button:hover {
-            background-image: linear-gradient(to right, #8b5cf6, #6366f1); 
+            transform: translateY(-8px) scale(1.01); /* More pronounced lift and slight scale */
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15); /* Deeper shadow */
+            border-color: #8b5cf6; /* Highlight border on hover */
         }
 
+        /* Image container for overlay effect */
+        .event-card .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem 1rem 0 0; /* Match card border radius */
+        }
+
+        .event-card .image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3)); /* Soft gradient overlay */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .event-card:hover .image-container::before {
+            opacity: 1; /* Show overlay on hover */
+        }
         
+        /* Gradient Button - Adjusted for consistency */
+        .gradient-button {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6); /* Indigo to Violet */
+            transition: background-image 0.3s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .gradient-button:hover {
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1); /* Reverse gradient on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Add a subtle shadow on hover */
+        }
+
+        /* Focus Ring for Inputs/Selects */
+        .focus-ring-colorful:focus {
+            outline: none;
+            border-color: #8b5cf6; /* Violet border */
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); /* Softer, wider focus ring */
+        }
+
+        /* Hero Section Gradient Animation */
+        @keyframes heroGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Adjusted header for more compactness and subtle detailing */
+        .animated-header {
+            background: linear-gradient(270deg, #e0e7ff, #f0f4ff, #e0e7ff);
+            background-size: 200% 200%;
+            animation: heroGradient 15s ease infinite;
+            padding: 2.5rem 1.5rem; /* Reduced padding for more compactness */
+            border-radius: 1.5rem;
+            margin-bottom: 2rem; /* Reduced margin-bottom */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Soft shadow for the header */
+            position: relative; /* For potential absolute positioning of decorative elements */
+            overflow: hidden; /* For any background patterns */
+        }
+
+        /* Subtle abstract pattern/shapes for detailing */
+        .animated-header::before,
+        .animated-header::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3); /* Semi-transparent white shapes */
+            border-radius: 50%;
+            opacity: 0.7;
+            pointer-events: none; /* Ensure they don't block interaction */
+        }
+
+        .animated-header::before {
+            width: 100px;
+            height: 100px;
+            top: -30px;
+            left: -30px;
+            background: rgba(99, 102, 241, 0.1); /* Indigo tint */
+            animation: floatShape 10s ease-in-out infinite alternate;
+        }
+
+        .animated-header::after {
+            width: 70px;
+            height: 70px;
+            bottom: -20px;
+            right: -20px;
+            background: rgba(139, 92, 246, 0.1); /* Violet tint */
+            animation: floatShape 12s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatShape {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, 15px) scale(1.05); }
+        }
+
+
+        /* Modal Styles - Adjusted to match new design with subtle animation */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); /* Darker overlay */
             justify-content: center;
             align-items: center;
+            padding: 1rem;
         }
         .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 2.5rem;
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
-            width: 90%;
-            max-width: 500px; /* max-w-lg */
+            background-color: #ffffff;
+            padding: 2.5rem; /* Increased padding */
+            border-radius: 1.25rem; /* More rounded corners */
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3); /* Deeper shadow */
+            width: 95%;
+            max-width: 600px; /* Slightly larger max-width */
             position: relative;
+            animation: fadeInScaleSlide 0.4s ease-out forwards; /* New entry animation */
+            transform-origin: center; /* Ensure scaling from center */
         }
         .close-button {
-            color: #aaa;
+            color: #9ca3af; 
             position: absolute;
             top: 1rem;
-            right: 1.5rem;
-            font-size: 2rem;
-            font-weight: bold;
+            right: 1.25rem; 
+            font-size: 2.5rem; /* Larger icon */
+            font-weight: normal; 
             cursor: pointer;
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
         .close-button:hover,
         .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
+            color: #4b5563; 
+            transform: rotate(90deg); /* Spin on hover */
         }
+
+        /* Keyframe for modal animation */
+        @keyframes fadeInScaleSlide {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%) scale(0.9); /* Start slightly up and smaller */
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1); /* End in center, full size */
+            }
+        }
+
+        /* Countdown Badge - minor adjustments */
+        .countdown-badge { /* Applied to countdownDisplay directly in JS now */
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-out;
+        }
+        .event-card:hover .countdown-badge {
+            transform: scale(1.1); /* Slightly pop the badge on hover */
+        }
+
+        /* Message styles within modal */
+        #modalMessage.success {
+            color: #10B981; /* Green for success */
+        }
+        #modalMessage.error {
+            color: #EF4444; /* Red for error */
+        }
+        #modalMessage.info {
+            color: #6366f1; /* Indigo for info/loading */
+        }
+
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center pb-8">
-
-    <nav class="w-full bg-white shadow-md py-4 mb-8">
-        <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-            <a href="." class="text-2xl font-bold text-gray-800">EventHub</a>
-            <div class="flex items-center space-x-4">
+<body class="flex flex-col items-center pb-12">
+    <nav class="w-full bg-white shadow-lg py-5 mb-6"> 
+        <div class="max-w-7xl mx-auto flex justify-between items-center px-6">
+            <a href="." class="text-3xl font-extrabold text-gray-900 tracking-tight">EventHub</a>
+            <div class="flex items-center space-x-6">
                 <a href="adminlogin.html" class="text-gray-600 hover:text-indigo-600 transition duration-300" title="Admin Login">
-                    <i class="fas fa-user-shield fa-xl"></i>
+                    <i class="fas fa-user-shield fa-2x"></i>
                 </a>
-                <a href="orglogin.html" class="gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                <a href="orglogin.html" class="gradient-button text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
                     Organizer Login
                 </a>
             </div>
         </div>
     </nav>
 
-    <header class="w-full max-w-4xl mx-auto text-center mb-10 px-4">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
-            Upcoming Events
+    <header class="w-full max-w-5xl mx-auto text-center animated-header"> 
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight"> 
+            Discover & Join <span class="text-indigo-600">Exciting</span> Events
         </h1>
-        <p class="text-xl text-gray-600">
-            Discover and register for exciting events happening around you!
+        <p class="text-md md:text-lg text-gray-700 max-w-3xl mx-auto"> 
+            Your gateway to unforgettable experiences, from local gatherings to global conferences.
         </p>
     </header>
 
-    <section class="w-full max-w-6xl mx-auto mb-8 px-4">
-        <div class="flex flex-col sm:flex-row gap-4">
-            <input type="text" id="searchInput" placeholder="Search by title or description..."
-                   class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <section class="w-full max-w-6xl mx-auto mb-8 px-6"> 
+        <div class="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-xl shadow-lg"> 
+            <input type="text" id="searchInput" placeholder="Search by title, description, or location..."
+                    class="flex-grow p-3 border border-gray-300 rounded-lg focus-ring-colorful text-gray-700"> 
             <select id="categoryFilter"
-                    class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    class="p-3 border border-gray-300 rounded-lg focus-ring-colorful text-gray-700"> 
                 <option value="">All Categories</option>
-                </select>
+            </select>
             <input type="date" id="dateFilter"
-                   class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button id="resetFilters" class="gradient-button text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
-                Reset
+                    class="p-3 border border-gray-300 rounded-lg focus-ring-colorful text-gray-700"> 
+            <button id="resetFilters" class="gradient-button text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75"> 
+                Reset Filters
             </button>
         </div>
     </section>
 
-    <div id="loadingMessage" class="text-center text-indigo-500 text-lg mt-4 hidden">Loading events...</div>
-    <div id="errorMessage" class="text-center text-red-600 text-lg mt-4 hidden">Failed to load events. Please try again later.</div>
-    <div id="noEventsFoundMessage" class="text-gray-600 text-lg col-span-full text-center mt-4 hidden">No events found matching your criteria.</div>
+    <div id="loadingMessage" class="text-center text-indigo-600 text-lg mt-6 hidden font-medium">Loading amazing events...</div> 
+    <div id="errorMessage" class="text-center text-red-600 text-lg mt-6 hidden font-medium">Oops! Failed to load events. Please try again later.</div> 
+    <div id="noEventsFoundMessage" class="text-gray-600 text-lg col-span-full text-center mt-6 hidden font-medium">No events found matching your criteria. Try adjusting your filters!</div> 
+    
+    <main id="events-container" class="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+    </main>
 
-    <main id="events-container" class="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-        </main>
-
-    <footer class="w-full max-w-4xl mx-auto text-center mt-12 py-6 text-gray-500 text-sm">
-        <p>&copy; 2025 EventHub. All rights reserved.</p>
+    <footer class="w-full max-w-4xl mx-auto text-center mt-20 py-8 text-gray-500 text-sm border-t border-gray-200">
+        <p>&copy; 2025 EventHub. All rights reserved. Designed with <i class="fas fa-heart text-red-500"></i></p>
     </footer>
 
     <div id="registrationModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeModalBtn">&times;</span>
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Register for Event</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-5 text-center">Register for Event</h2>
             <form id="registrationForm">
                 <input type="hidden" id="modalEventId">
-                <h3 id="modalEventTitle" class="text-xl font-semibold text-gray-800 mb-4"></h3>
-
+                <h3 id="modalEventTitle" class="text-xl font-semibold text-gray-800 mb-3"></h3>
+                <p id="modalEventFee" class="text-base text-gray-700 mb-5"></p>
+                
                 <div class="mb-4">
-                    <label for="attendeeName" class="block text-gray-700 text-sm font-bold mb-2">Your Name:</label>
+                    <label for="attendeeName" class="block text-gray-700 text-sm font-semibold mb-2">Your Name:</label>
                     <input type="text" id="attendeeName" name="attendeeName" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2.5 px-4 text-gray-700 leading-tight focus-ring-colorful">
                 </div>
 
                 <div class="mb-6">
-                    <label for="attendeeEmail" class="block text-gray-700 text-sm font-bold mb-2">Your Email:</label>
+                    <label for="attendeeEmail" class="block text-gray-700 text-sm font-semibold mb-2">Your Email:</label>
                     <input type="email" id="attendeeEmail" name="attendeeEmail" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2.5 px-4 text-gray-700 leading-tight focus-ring-colorful">
                 </div>
 
-                <div id="modalMessage" class="text-center text-sm mb-4 hidden"></div>
-
-                <button type="submit" class="gradient-button text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 w-full">
+                <div id="modalMessage" class="text-center text-sm mb-4 hidden font-medium"></div>
+                <button type="submit" class="gradient-button text-white font-semibold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 w-full">
                     Complete Registration
                 </button>
             </form>
@@ -150,7 +281,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000/api';
+        const API_BASE_URL = 'http://localhost:5000/api'; 
 
         const eventsContainer = document.getElementById('events-container');
         const searchInput = document.getElementById('searchInput');
@@ -162,18 +293,20 @@
         const errorMessage = document.getElementById('errorMessage');
         const noEventsFoundMessage = document.getElementById('noEventsFoundMessage');
 
-        
+        // Modal elements
         const registrationModal = document.getElementById('registrationModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const registrationForm = document.getElementById('registrationForm');
         const modalEventId = document.getElementById('modalEventId');
         const modalEventTitle = document.getElementById('modalEventTitle');
+        const modalEventFee = document.getElementById('modalEventFee');
         const attendeeNameInput = document.getElementById('attendeeName');
         const attendeeEmailInput = document.getElementById('attendeeEmail');
         const modalMessage = document.getElementById('modalMessage');
 
 
-        let allFetchedEvents = [];
+        let allFetchedEvents = []; 
+        const countdownIntervals = {};
 
         function createElement(tag, classes, content = '') {
             const element = document.createElement(tag);
@@ -202,7 +335,13 @@
             loadingMessage.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             noEventsFoundMessage.classList.add('hidden');
-            eventsContainer.innerHTML = '';
+            
+            for (const eventId in countdownIntervals) {
+                clearInterval(countdownIntervals[eventId]);
+                delete countdownIntervals[eventId]; 
+            }
+            
+            eventsContainer.innerHTML = ''; 
 
             try {
                 const response = await fetch(`${API_BASE_URL}/public/events`);
@@ -215,7 +354,7 @@
                 loadingMessage.classList.add('hidden');
 
                 populateCategoryFilter(allFetchedEvents);
-                renderFilteredEvents();
+                renderFilteredEvents(); 
             } catch (error) {
                 console.error('Failed to fetch public events:', error);
                 loadingMessage.classList.add('hidden');
@@ -224,6 +363,11 @@
         }
 
         function renderFilteredEvents() {
+            for (const eventId in countdownIntervals) {
+                clearInterval(countdownIntervals[eventId]);
+                delete countdownIntervals[eventId]; 
+            }
+            
             eventsContainer.innerHTML = '';
             noEventsFoundMessage.classList.add('hidden');
 
@@ -235,12 +379,13 @@
 
             const filteredEvents = eventsToDisplay.filter(event => {
                 const matchesSearch = searchTerm === '' ||
-                                      event.title.toLowerCase().includes(searchTerm) ||
-                                      (event.description && event.description.toLowerCase().includes(searchTerm)) ||
-                                      (event.location && event.location.toLowerCase().includes(searchTerm));
+                                     event.title.toLowerCase().includes(searchTerm) ||
+                                     (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+                                     (event.location && event.location.toLowerCase().includes(searchTerm));
 
                 const matchesCategory = selectedCategory === '' || event.category === selectedCategory;
-                const matchesDate = selectedDate === '' || event.date === selectedDate;
+                const eventDateForFilter = event.fullDateTime ? new Date(event.fullDateTime).toISOString().split('T')[0] : '';
+                const matchesDate = selectedDate === '' || eventDateForFilter === selectedDate; 
 
                 return matchesSearch && matchesCategory && matchesDate;
             });
@@ -252,99 +397,226 @@
 
             filteredEvents.forEach(event => {
                 const card = createElement('div', [
-                    'event-card', 'bg-white', 'rounded-xl', 'shadow-lg', 'overflow-hidden',
-                    'flex', 'flex-col', 'transform', 'hover:scale-102', 'duration-300'
+                    'event-card', 'bg-white', 'rounded-2xl', 'shadow-xl', 'overflow-hidden',
+                    'flex', 'flex-col', 'transform', 'duration-300'
                 ]);
 
+                // Image container for the overlay effect
+                const imageContainer = createElement('div', ['image-container']);
                 const img = document.createElement('img');
                 img.src = event.imageUrl || "https://placehold.co/400x250/6366f1/ffffff?text=Event+Image";
                 img.alt = event.title;
-                img.classList.add('w-full', 'h-48', 'object-cover');
+                img.classList.add('w-full', 'h-52', 'object-cover');
                 img.onerror = function() {
                     this.src = "https://placehold.co/400x250/cccccc/000000?text=Image+Not+Found";
                 };
-                card.appendChild(img);
+                imageContainer.appendChild(img);
+                card.appendChild(imageContainer);
 
-                const contentDiv = createElement('div', ['p-6', 'flex-grow', 'flex', 'flex-col']);
+                // Countdown Display positioned over image
+                const countdownDisplay = createElement('div', [
+                    'absolute', 'top-3', 'right-3', 
+                    'bg-red-600', 'text-white',     
+                    'text-xs', 'font-semibold',     
+                    'px-2', 'py-1', 'rounded-full', 
+                    'shadow-md', 'countdown-badge' /* Added a class for styling */
+                ]);
+                countdownDisplay.id = `countdown-${event._id}`; 
+                countdownDisplay.textContent = 'Loading...'; 
+                card.appendChild(countdownDisplay); 
+
+                const contentDiv = createElement('div', ['p-4', 'flex-grow', 'flex', 'flex-col']);
 
                 if (event.category) {
                     const categoryTag = createElement('span', [
                         'inline-block', 'bg-indigo-100', 'text-indigo-800', 'text-xs',
-                        'font-semibold', 'px-2', 'py-1', 'rounded-full', 'uppercase', 'tracking-wide',
+                        'font-medium', 'px-2.5', 'py-0.5', 'rounded-full', 'uppercase', 'tracking-wide',
                         'mb-2'
                     ], event.category);
                     contentDiv.appendChild(categoryTag);
                 }
 
-                const title = createElement('h2', ['text-2xl', 'font-bold', 'text-gray-900', 'mb-2'], event.title);
+                const title = createElement('h2', ['text-xl', 'font-bold', 'text-gray-900', 'mb-1.5'], event.title);
                 contentDiv.appendChild(title);
 
-                const dateTime = createElement('p', ['text-gray-600', 'text-sm', 'mb-1'], event.date + ' at ' + event.time);
-                contentDiv.appendChild(dateTime);
+                const eventDateTime = new Date(event.fullDateTime);
+                const displayDateOptions = { year: 'numeric', month: 'short', day: 'numeric' }; 
+                const displayTimeOptions = { hour: 'numeric', minute: 'numeric', hour12: true }; 
+                
+                const formattedDisplayDate = eventDateTime.toLocaleDateString(undefined, displayDateOptions);
+                const formattedDisplayTime = eventDateTime.toLocaleTimeString(undefined, displayTimeOptions);
 
-                const location = createElement('p', ['text-gray-600', 'text-sm', 'mb-4'], event.location);
+                const dateTimeDisplay = createElement('p', ['text-gray-600', 'text-sm', 'mb-1'], `${formattedDisplayDate} at ${formattedDisplayTime}`);
+                contentDiv.appendChild(dateTimeDisplay);
+
+                const location = createElement('p', ['text-gray-600', 'text-sm', 'mb-3'], event.location);
                 contentDiv.appendChild(location);
 
-                const description = createElement('p', ['text-gray-700', 'text-base', 'mb-6', 'flex-grow'], event.description || 'No description provided.');
+                const description = createElement('p', ['text-gray-700', 'text-sm', 'mb-4', 'flex-grow'], event.description || 'No description provided.');
                 contentDiv.appendChild(description);
 
+                const feeDisplay = createElement('p', ['text-gray-800', 'text-base', 'font-bold', 'mb-4']);
+                feeDisplay.textContent = event.fee > 0 ? `Fee: Rs.${event.fee.toFixed(2)}` : 'Fee: Free';
+                contentDiv.appendChild(feeDisplay);
+                
                 const registerButton = createElement('button', [
-                    'gradient-button', 'text-white', 'font-semibold', 'py-3', 'px-6',
+                    'gradient-button', 'text-white', 'font-semibold', 'py-2.5', 'px-6',
                     'rounded-lg', 'shadow-md', 'hover:shadow-lg', 'focus:outline-none',
                     'focus:ring-2', 'focus:ring-indigo-500', 'focus:ring-opacity-75',
                     'self-start'
-                ], 'Register Now');
+                ]);
 
+                if (event.fee > 0) {
+                    registerButton.textContent = `Register (Rs.${event.fee.toFixed(2)})`;
+                } else {
+                    registerButton.textContent = 'Register Now (Free)';
+                }
                 
                 registerButton.addEventListener('click', () => {
-                    openRegistrationModal(event._id, event.title);
+                    openRegistrationModal(event); 
                 });
                 contentDiv.appendChild(registerButton);
 
                 card.appendChild(contentDiv);
                 eventsContainer.appendChild(card);
+
+                startCountdown(event._id, event.fullDateTime);
             });
         }
 
-        
+        function startCountdown(eventId, fullDateTimeString) {
+            const countdownElement = document.getElementById(`countdown-${eventId}`);
+            if (!countdownElement) return;
 
-        function openRegistrationModal(eventId, eventTitle) {
-            registrationModal.style.display = 'flex'; // Show the modal
-            modalEventId.value = eventId;
-            modalEventTitle.textContent = `Register for: ${eventTitle}`;
-            attendeeNameInput.value = ''; // Clear previous input
-            attendeeEmailInput.value = ''; // Clear previous input
-            modalMessage.classList.add('hidden'); // Hide any previous messages
+            const targetDate = new Date(fullDateTimeString);
+
+            if (isNaN(targetDate.getTime())) {
+                countdownElement.textContent = "Invalid Date/Time"; 
+                countdownElement.classList.remove('bg-red-600', 'bg-green-600'); 
+                countdownElement.classList.add('bg-gray-500');   
+                console.error(`Invalid date/time string for event ${eventId}: ${fullDateTimeString}`);
+                return;
+            }
+
+            if (countdownIntervals[eventId]) {
+                clearInterval(countdownIntervals[eventId]);
+            }
+
+            function updateCountdown() {
+                const currentTime = new Date().getTime();
+                const distance = targetDate.getTime() - currentTime;
+
+                if (distance < 0) {
+                    const liveThreshold = 4 * 60 * 60 * 1000; 
+                    if (currentTime >= targetDate.getTime() && currentTime < targetDate.getTime() + liveThreshold) {
+                        countdownElement.classList.remove('bg-red-600', 'bg-gray-500');
+                        countdownElement.classList.add('bg-green-600'); 
+                        countdownElement.textContent = "Live Now!";
+                    } else {
+                        countdownElement.classList.remove('bg-red-600', 'bg-green-600');
+                        countdownElement.classList.add('bg-gray-500'); 
+                        countdownElement.textContent = "Ended";
+                    }
+                    clearInterval(countdownIntervals[eventId]);
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            updateCountdown(); 
+            countdownIntervals[eventId] = setInterval(updateCountdown, 1000); 
+        }
+
+        function openRegistrationModal(event) {
+            registrationModal.style.display = 'flex';
+            
+            let rawEventId = event._id;
+            let cleanedEventId = rawEventId;
+
+            // Updated Regex to specifically target the ObjectId within "p_ID:1" format
+            const specificObjectIdRegex = /p_([0-9a-fA-F]{24}):\d+/;
+            const genericObjectIdRegex = /^[0-9a-fA-F]{24}$/; // For cases where it's already a clean ID
+
+            const matchSpecific = rawEventId.match(specificObjectIdRegex);
+            if (matchSpecific && matchSpecific[1]) {
+                cleanedEventId = matchSpecific[1]; // Extract the captured group (the 24-char ID)
+            } else if (genericObjectIdRegex.test(rawEventId)) {
+                cleanedEventId = rawEventId; // It's already a clean ID
+            } else {
+                console.warn(`Could not extract clean ObjectId from '${rawEventId}'. Using original for now, but this might cause issues.`);
+                cleanedEventId = rawEventId; // Fallback, but expect continued errors if the format is truly unexpected
+            }
+
+            modalEventId.value = cleanedEventId;
+            modalEventTitle.textContent = `Register for: ${event.title}`;
+            modalEventFee.textContent = event.fee > 0 ? `Fee: Rs.${event.fee.toFixed(2)}` : 'Free Event';
+            attendeeNameInput.value = '';
+            attendeeEmailInput.value = '';
+            modalMessage.classList.add('hidden'); 
+            modalMessage.classList.remove('success', 'error', 'info'); 
+
+            const registrationSubmitButton = registrationForm.querySelector('button[type="submit"]');
+
+            if (event.fee > 0) {
+                registrationSubmitButton.textContent = `Proceed (Rs.${event.fee.toFixed(2)} Required)`;
+                modalMessage.classList.remove('hidden');
+                modalMessage.classList.add('error'); 
+                modalMessage.textContent = `Note: This event has a fee of Rs.${event.fee.toFixed(2)}. Payment integration is not yet available; your registration will be noted as pending payment.`;
+            } else {
+                registrationSubmitButton.textContent = 'Complete Registration (Free)';
+                modalMessage.classList.add('hidden'); 
+            }
         }
 
         function closeRegistrationModal() {
-            registrationModal.style.display = 'none'; // Hide the modal
+            registrationModal.style.display = 'none';
         }
 
-        // Close modal when close button is clicked
         closeModalBtn.addEventListener('click', closeRegistrationModal);
 
-        // Close modal if user clicks outside of the modal content
         window.addEventListener('click', (event) => {
             if (event.target == registrationModal) {
                 closeRegistrationModal();
             }
         });
 
-        // --- NEW: Handle Registration Form Submission ---
         registrationForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
 
             const name = attendeeNameInput.value.trim();
             const email = attendeeEmailInput.value.trim();
-            const eventId = modalEventId.value;
+            const eventId = modalEventId.value; 
 
-            modalMessage.classList.remove('hidden');
-            modalMessage.classList.remove('text-green-600', 'text-red-600');
-            modalMessage.classList.add('text-indigo-500');
+            modalMessage.classList.remove('hidden', 'success', 'error', 'info'); 
+            modalMessage.classList.add('info'); 
             modalMessage.textContent = 'Registering...';
 
             try {
+                const eventResponse = await fetch(`${API_BASE_URL}/public/events/${eventId}`);
+                if (!eventResponse.ok) {
+                    console.error(`Failed to fetch event details for ID ${eventId}. Status: ${eventResponse.status}`);
+                    const errorDetails = await eventResponse.json().catch(() => ({})); 
+                    throw new Error(errorDetails.message || 'Could not fetch event details for registration check due to server issue.');
+                }
+                const eventToRegister = await eventResponse.json();
+
+                let registrationStatusMessage = '';
+                let messageType = 'success'; 
+
+                if (eventToRegister.fee > 0) {
+                    registrationStatusMessage = `Registration noted. This event has a fee of Rs.${eventToRegister.fee.toFixed(2)}. Payment will be processed separately.`;
+                    messageType = 'info'; 
+                } else {
+                    registrationStatusMessage = 'Registration successful!';
+                    messageType = 'success'; 
+                }
+
                 const response = await fetch(`${API_BASE_URL}/attendees`, {
                     method: 'POST',
                     headers: {
@@ -356,24 +628,22 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    modalMessage.classList.remove('text-indigo-500', 'text-red-600');
-                    modalMessage.classList.add('text-green-600');
-                    modalMessage.textContent = data.message || 'Registration successful!';
-                    // Optionally close modal after a short delay
-                    setTimeout(closeRegistrationModal, 2000);
+                    modalMessage.classList.remove('info', 'error');
+                    modalMessage.classList.add(messageType); 
+                    modalMessage.textContent = data.message || registrationStatusMessage;
+                    setTimeout(closeRegistrationModal, 2000); 
                 } else {
-                    modalMessage.classList.remove('text-indigo-500', 'text-green-600');
-                    modalMessage.classList.add('text-red-600');
+                    modalMessage.classList.remove('info', 'success');
+                    modalMessage.classList.add('error');
                     modalMessage.textContent = data.message || 'Registration failed. Please try again.';
                 }
             } catch (error) {
                 console.error('Network or server error during registration:', error);
-                modalMessage.classList.remove('text-indigo-500', 'text-green-600');
-                modalMessage.classList.add('text-red-600');
-                modalMessage.textContent = 'A network error occurred. Please try again.';
+                modalMessage.classList.remove('info', 'success');
+                modalMessage.classList.add('error');
+                modalMessage.textContent = `An error occurred during registration: ${error.message || 'Please try again.'}`; 
             }
         });
-
 
         // Event Listeners for filters
         searchInput.addEventListener('input', renderFilteredEvents);
@@ -383,7 +653,7 @@
             searchInput.value = '';
             categoryFilter.value = '';
             dateFilter.value = '';
-            fetchAndRenderEvents();                                                 
+            fetchAndRenderEvents();
         });
 
         document.addEventListener('DOMContentLoaded', fetchAndRenderEvents);

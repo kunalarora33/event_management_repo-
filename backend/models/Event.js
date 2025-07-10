@@ -8,11 +8,12 @@ const EventSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: false,
+        // If you want it required: true, otherwise keep false or remove the line
+        required: true, // Changed from false to true based on the second definition
         trim: true
     },
     date: {
-        type: String, 
+        type: Date, // Consider changing to Date type for better date manipulation and queries
         required: true
     },
     time: {
@@ -24,15 +25,31 @@ const EventSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    organizer: { 
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Organizer', 
+    category: { // Added from the second definition
+        type: String,
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    imageUrl: { // Added from the second definition
+        type: String,
+        default: ''
+    },
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organizer',
+        required: true
+    },
+    fee: { // Added from the second definition
+        type: Number,
+        default: 0,
+        min: 0 // Ensure fee cannot be negative
+    },
+    attendees: [{ // Added from the second definition
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
+}, {
+    // Keep timestamps: true for createdAt and updatedAt fields
+    timestamps: true
 });
 
 module.exports = mongoose.model('Event', EventSchema);

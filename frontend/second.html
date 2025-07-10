@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EventHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .gradient-button {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+            transition: background-image 0.3s ease-in-out;
+        }
+        .gradient-button:hover {
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1);
+        }
+        .sidebar-link {
+            @apply flex items-center p-3 text-gray-700 hover:bg-indigo-100 hover:text-indigo-800 rounded-lg transition-colors duration-200;
+        }
+        .sidebar-link.active {
+            @apply bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <aside class="w-64 bg-white shadow-lg p-6 flex flex-col justify-between">
+        <div>
+            <div class="text-3xl font-bold text-gray-900 mb-8 text-center">EventHub<br><span class="text-xl text-indigo-600">Admin</span></div>
+            <nav class="space-y-2">
+                <a href="#" class="sidebar-link active" data-section="overview">
+                    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+                </a>
+                <a href="#" class="sidebar-link" data-section="events">
+                    <i class="fas fa-calendar-alt mr-3"></i> Event Management
+                </a>
+                <a href="#" class="sidebar-link" data-section="users">
+                    <i class="fas fa-users mr-3"></i> User Management
+                </a>
+                <a href="#" class="sidebar-link" data-section="categories">
+                    <i class="fas fa-tags mr-3"></i> Category Management
+                </a>
+                </nav>
+        </div>
+        <div class="mt-8">
+            <button id="adminLogoutButton" class="w-full gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 p-8">
+        <header class="flex justify-between items-center mb-8">
+            <h1 id="mainTitle" class="text-4xl font-extrabold text-gray-900">Dashboard Overview</h1>
+            <span class="text-lg text-gray-700 font-medium">Welcome, Admin!</span>
+        </header>
+
+        <div id="contentArea">
+            <section id="overview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Total Events</h3>
+                        <p class="text-3xl font-bold text-gray-900">125</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
+                        <p class="text-3xl font-bold text-gray-900">560</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                    <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Total Registrations</h3>
+                        <p class="text-3xl font-bold text-gray-900">1890</p>
+                    </div>
+                </div>
+            </section>
+
+            </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api'; // Or your actual backend URL
+
+        // Basic client-side check (more robust on backend)
+        // For a real app, you'd store an admin token from login in localStorage and validate it
+        // For this example, after a hardcoded login, you'd assume the user is "admin"
+        const isAdminLoggedIn = true; // This would come from a real login check
+
+        if (!isAdminLoggedIn) {
+            window.location.href = 'adminlogin.html'; // Redirect if not logged in
+        }
+
+        document.getElementById('adminLogoutButton').addEventListener('click', () => {
+            // In a real app, clear admin-specific tokens from localStorage
+            // localStorage.removeItem('adminToken');
+            alert('Admin Logged Out!');
+            window.location.href = 'adminlogin.html'; // Redirect to login page
+        });
+
+        // Simple tab switching logic for demonstration
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const contentArea = document.getElementById('contentArea');
+        const mainTitle = document.getElementById('mainTitle');
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebarLinks.forEach(l => l.classList.remove('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700'));
+                e.currentTarget.classList.add('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+
+                const section = e.currentTarget.dataset.section;
+                mainTitle.textContent = e.currentTarget.textContent.trim(); // Update main title
+
+                // Dynamically load content or show/hide sections
+                loadSectionContent(section);
+            });
+        });
+
+        function loadSectionContent(section) {
+            // Clear content area
+            contentArea.innerHTML = '';
+
+            // This is where you would fetch data and build the UI for each section
+            // For now, we'll just put placeholder text/elements
+
+            if (section === 'overview') {
+                 contentArea.innerHTML = `
+                    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
+                                <i class="fas fa-calendar-check fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-700">Total Events</h3>
+                                <p class="text-3xl font-bold text-gray-900" id="totalEventsCount">...</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                            <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
+                                <p class="text-3xl font-bold text-gray-900" id="totalUsersCount">...</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                            <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
+                                <i class="fas fa-ticket-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-700">Total Registrations</h3>
+                                <p class="text-3xl font-bold text-gray-900" id="totalRegistrationsCount">...</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="bg-white p-6 rounded-xl shadow-md mt-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Activity</h2>
+                        <ul id="recentActivityList" class="space-y-3 text-gray-700">
+                            <li>New event "Tech Conference 2025" created by John Doe</li>
+                            <li>User Jane Smith registered for "Music Fest"</li>
+                            <li>Event "Local Art Fair" updated</li>
+                        </ul>
+                    </section>
+                `;
+                // You would then fetch these counts from your API:
+                // fetch(`${API_BASE_URL}/admin/dashboard-stats`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
+                //    .then(res => res.json()).then(data => {
+                //        document.getElementById('totalEventsCount').textContent = data.events;
+                //        document.getElementById('totalUsersCount').textContent = data.users;
+                //        document.getElementById('totalRegistrationsCount').textContent = data.registrations;
+                //    });
+
+            } else if (section === 'events') {
+                contentArea.innerHTML = `
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">All Events</h2>
+                        <div class="mb-4">
+                            <input type="text" placeholder="Search events..." class="w-full px-3 py-2 border rounded-md">
+                        </div>
+                        <div id="adminEventList" class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organizer</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendees</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventTableBody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Annual Tech Summit</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">organizer1@example.com</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">2025-08-15</td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">85</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+                                            <button class="text-red-600 hover:text-red-900 mr-3">Delete</button>
+                                            <button class="text-purple-600 hover:text-purple-900">Approve</button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                            </table>
+                        </div>
+                    </section>
+                `;
+                // You would fetch all events here and populate the table
+                // fetch(`${API_BASE_URL}/admin/events`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
+            } else if (section === 'users') {
+                contentArea.innerHTML = `
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">All Users</h2>
+                        <div class="mb-4">
+                            <input type="text" placeholder="Search users..." class="w-full px-3 py-2 border rounded-md">
+                        </div>
+                        <div id="adminUserList" class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Alice Johnson</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">alice@example.com</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">Attendee</td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                            <button class="text-orange-600 hover:text-orange-900 mr-3">Suspend</button>
+                                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                            </table>
+                        </div>
+                    </section>
+                `;
+                 // You would fetch all users here and populate the table
+                // fetch(`${API_BASE_URL}/admin/users`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
+            } else if (section === 'categories') {
+                 contentArea.innerHTML = `
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Event Categories</h2>
+                        <div class="mb-4 flex gap-4">
+                            <input type="text" id="newCategoryName" placeholder="New Category Name" class="flex-grow px-3 py-2 border rounded-md">
+                            <button class="gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">Add Category</button>
+                        </div>
+                        <ul id="categoryList" class="space-y-2">
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm">
+                                <span class="text-gray-700 font-medium">Technology (34 events)</span>
+                                <div>
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                </div>
+                            </li>
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm">
+                                <span class="text-gray-700 font-medium">Music (18 events)</span>
+                                <div>
+                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </section>
+                `;
+                 // You would fetch categories here and populate the list
+                // fetch(`${API_BASE_URL}/admin/categories`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
+            }
+            // Add more else if blocks for other sections
+        }
+
+        // Load default section on page load
+        loadSectionContent('overview');
+
+    </script>
+</body>
+</html>
