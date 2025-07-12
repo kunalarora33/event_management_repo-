@@ -23,14 +23,14 @@ const authRoutes = require('./routes/auth');
 const eventsRoutes = require('./routes/events');
 const publicEventsRoutes = require('./routes/publicEvents');
 const attendeeRoutes = require('./routes/attendees');
- // <-- NEW: Import the admin routes
+const adminRoutes = require('./routes/admin'); // <-- NOW UNCOMMENTED: Import the admin routes
 
 // Tell the server to use these routes for paths starting with their respective prefixes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/public/events', publicEventsRoutes);
 app.use('/api/attendees', attendeeRoutes);
- // <-- NEW: Use the admin routes for '/api/admin' prefix
+app.use('/api/admin', adminRoutes); // <-- NOW UNCOMMENTED: Use the admin routes for '/api/admin' prefix
 
 
 // Simple test route: If you visit http://localhost:5000/ in your browser

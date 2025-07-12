@@ -8,9 +8,9 @@ const mongoose = require('mongoose'); // Ensure mongoose is imported
 router.get('/', async (req, res) => {
     console.log('Public Events Route: Request received.');
     try {
-        // Correctly call find on the Event model
-        const events = await Event.find({}).sort({ date: 1, time: 1 });
-        console.log(`Public Events Route: Found ${events.length} events.`);
+        // Correctly call find on the Event model, but only for approved events
+        const events = await Event.find({ status: 'approved' }).sort({ date: 1, time: 1 });
+        console.log(`Public Events Route: Found ${events.length} approved events.`);
 
         const eventsWithFormattedData = await Promise.all(events.map(async (event) => {
             const eventObj = event.toObject();
@@ -120,7 +120,7 @@ router.get('/:id', async (req, res) => {
     }
 
     try {
-        const event = await Event.findById(eventId); // Correctly call findById on the Event model
+        const event = await Event.findById(eventId);
 
         if (!event) {
             console.log(`Public Events Route: Event not found for ID: ${eventId}`);
@@ -180,10 +180,14 @@ router.get('/:id', async (req, res) => {
             ...eventObj,
             fullDateTime: fullDateTimeString
         });
-    } catch (error) {
-        console.error(`CRITICAL ERROR fetching single public event ${eventId}:`, error);
-        res.status(500).send('Server Error');
-    }
+  } catch (error) {
+    console.error('CRITICAL ERROR fetching public events:', error);
+    // CHANGE THIS LINE
+    // res.status(500).send('Server Error');
+
+    // TO THIS:
+    res.status(500).json({ message: 'Server Error', details: error.message });
+}
 });
 
 module.exports = router;

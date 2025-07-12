@@ -19,8 +19,8 @@
             background-image: linear-gradient(to right, #8b5cf6, #6366f1);
         }
         .sidebar-link {
-            @apply flex items-center p-3 text-gray-700 hover:bg-indigo-100 hover:text-indigo-800 rounded-lg transition-colors duration-200;
-        }
+    @apply flex items-center p-3 text-lg text-gray-700 hover:bg-indigo-100 hover:text-indigo-800 rounded-lg transition-colors duration-200 whitespace-nowrap;
+}
         .sidebar-link.active {
             @apply bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white;
         }
@@ -28,23 +28,23 @@
 </head>
 <body class="flex min-h-screen">
 
-    <aside class="w-64 bg-white shadow-lg p-6 flex flex-col justify-between">
+    <aside id="sidebar" class="w-64 bg-white shadow-lg p-6 flex flex-col justify-between fixed md:static -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50">
         <div>
             <div class="text-3xl font-bold text-gray-900 mb-8 text-center">EventHub<br><span class="text-xl text-indigo-600">Admin</span></div>
-            <nav class="space-y-2">
-                <a href="#" class="sidebar-link active" data-section="overview">
-                    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
-                </a>
-                <a href="#" class="sidebar-link" data-section="events">
-                    <i class="fas fa-calendar-alt mr-3"></i> Event Management
-                </a>
-                <a href="#" class="sidebar-link" data-section="users">
-                    <i class="fas fa-users mr-3"></i> User Management
-                </a>
-                <a href="#" class="sidebar-link" data-section="categories">
-                    <i class="fas fa-tags mr-3"></i> Category Management
-                </a>
-                </nav>
+            <nav class="space-y-6">
+               <a href="#" class="sidebar-link active whitespace-nowrap" data-section="overview">
+    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+</a>
+<a href="#" class="sidebar-link whitespace-nowrap" data-section="events">
+    <i class="fas fa-calendar-alt mr-3"></i> Event Management
+</a>
+<a href="#" class="sidebar-link whitespace-nowrap" data-section="users">
+    <i class="fas fa-users mr-3"></i> User Management
+</a>
+<a href="#" class="sidebar-link whitespace-nowrap" data-section="categories">
+    <i class="fas fa-tags mr-3"></i> Category Management
+</a>
+            </nav>
         </div>
         <div class="mt-8">
             <button id="adminLogoutButton" class="w-full gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
@@ -53,250 +53,382 @@
         </div>
     </aside>
 
-    <div class="flex-1 p-8">
-        <header class="flex justify-between items-center mb-8">
-            <h1 id="mainTitle" class="text-4xl font-extrabold text-gray-900">Dashboard Overview</h1>
-            <span class="text-lg text-gray-700 font-medium">Welcome, Admin!</span>
-        </header>
+    <div class="flex-1 transition-all duration-300">
+        <div class="max-w-7xl mx-auto p-8">
+            <header class="flex justify-between items-center mb-8">
+                <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-gray-900 mr-4">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                <h1 id="mainTitle" class="text-4xl font-extrabold text-gray-900">Dashboard Overview</h1>
+                <span class="text-lg text-gray-700 font-medium hidden md:block">Welcome, Admin!</span>
+            </header>
 
-        <div id="contentArea">
-            <section id="overview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-calendar-check fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-700">Total Events</h3>
-                        <p class="text-3xl font-bold text-gray-900">125</p>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                    <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
-                        <p class="text-3xl font-bold text-gray-900">560</p>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                    <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-ticket-alt fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-700">Total Registrations</h3>
-                        <p class="text-3xl font-bold text-gray-900">1890</p>
-                    </div>
-                </div>
-            </section>
-
+            <div id="contentArea">
             </div>
+        </div>
     </div>
+<script>
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    
+    const adminToken = localStorage.getItem('adminToken');
 
-    <script>
-        const API_BASE_URL = 'http://localhost:5000/api'; // Or your actual backend URL
-
-        // Basic client-side check (more robust on backend)
-        // For a real app, you'd store an admin token from login in localStorage and validate it
-        // For this example, after a hardcoded login, you'd assume the user is "admin"
-        const isAdminLoggedIn = true; // This would come from a real login check
-
-        if (!isAdminLoggedIn) {
-            window.location.href = 'adminlogin.html'; // Redirect if not logged in
-        }
-
-        document.getElementById('adminLogoutButton').addEventListener('click', () => {
-            // In a real app, clear admin-specific tokens from localStorage
-            // localStorage.removeItem('adminToken');
-            alert('Admin Logged Out!');
-            window.location.href = 'adminlogin.html'; // Redirect to login page
+    // Add this code to handle the logout button click
+    const adminLogoutButton = document.getElementById('adminLogoutButton');
+    if (adminLogoutButton) {
+        adminLogoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('adminToken');
+            window.location.href = 'adminlogin.html';
         });
+    }
 
-        // Simple tab switching logic for demonstration
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
-        const contentArea = document.getElementById('contentArea');
-        const mainTitle = document.getElementById('mainTitle');
+    // Toggle sidebar on mobile
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
 
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebarLinks.forEach(l => l.classList.remove('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700'));
-                e.currentTarget.classList.add('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+    // Simple tab switching logic
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentArea = document.getElementById('contentArea');
+    const mainTitle = document.getElementById('mainTitle');
 
-                const section = e.currentTarget.dataset.section;
-                mainTitle.textContent = e.currentTarget.textContent.trim(); // Update main title
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Close sidebar on mobile after clicking a link
+            sidebar.classList.add('-translate-x-full');
 
-                // Dynamically load content or show/hide sections
-                loadSectionContent(section);
+            sidebarLinks.forEach(l => l.classList.remove('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700'));
+            e.currentTarget.classList.add('active', 'bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+
+            const section = e.currentTarget.dataset.section;
+            mainTitle.textContent = e.currentTarget.textContent.trim();
+            loadSectionContent(section);
+        });
+    });
+
+    // NEW: Functions to handle approve/decline events
+    async function updateEventStatus(eventId, status) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/events/${eventId}/${status}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminToken}`
+                }
             });
-        });
 
-        function loadSectionContent(section) {
-            // Clear content area
-            contentArea.innerHTML = '';
-
-            // This is where you would fetch data and build the UI for each section
-            // For now, we'll just put placeholder text/elements
-
-            if (section === 'overview') {
-                 contentArea.innerHTML = `
-                    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
-                                <i class="fas fa-calendar-check fa-2x"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-700">Total Events</h3>
-                                <p class="text-3xl font-bold text-gray-900" id="totalEventsCount">...</p>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                            <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
-                                <i class="fas fa-users fa-2x"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
-                                <p class="text-3xl font-bold text-gray-900" id="totalUsersCount">...</p>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
-                            <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
-                                <i class="fas fa-ticket-alt fa-2x"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-700">Total Registrations</h3>
-                                <p class="text-3xl font-bold text-gray-900" id="totalRegistrationsCount">...</p>
-                            </div>
-                        </div>
-                    </section>
-                    <section class="bg-white p-6 rounded-xl shadow-md mt-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Activity</h2>
-                        <ul id="recentActivityList" class="space-y-3 text-gray-700">
-                            <li>New event "Tech Conference 2025" created by John Doe</li>
-                            <li>User Jane Smith registered for "Music Fest"</li>
-                            <li>Event "Local Art Fair" updated</li>
-                        </ul>
-                    </section>
-                `;
-                // You would then fetch these counts from your API:
-                // fetch(`${API_BASE_URL}/admin/dashboard-stats`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
-                //    .then(res => res.json()).then(data => {
-                //        document.getElementById('totalEventsCount').textContent = data.events;
-                //        document.getElementById('totalUsersCount').textContent = data.users;
-                //        document.getElementById('totalRegistrationsCount').textContent = data.registrations;
-                //    });
-
-            } else if (section === 'events') {
-                contentArea.innerHTML = `
-                    <section class="bg-white p-6 rounded-xl shadow-md">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">All Events</h2>
-                        <div class="mb-4">
-                            <input type="text" placeholder="Search events..." class="w-full px-3 py-2 border rounded-md">
-                        </div>
-                        <div id="adminEventList" class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organizer</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendees</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="eventTableBody" class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">Annual Tech Summit</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">organizer1@example.com</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">2025-08-15</td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span></td>
-                                        <td class="px-6 py-4 whitespace-nowrap">85</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-                                            <button class="text-red-600 hover:text-red-900 mr-3">Delete</button>
-                                            <button class="text-purple-600 hover:text-purple-900">Approve</button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                            </table>
-                        </div>
-                    </section>
-                `;
-                // You would fetch all events here and populate the table
-                // fetch(`${API_BASE_URL}/admin/events`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
-            } else if (section === 'users') {
-                contentArea.innerHTML = `
-                    <section class="bg-white p-6 rounded-xl shadow-md">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">All Users</h2>
-                        <div class="mb-4">
-                            <input type="text" placeholder="Search users..." class="w-full px-3 py-2 border rounded-md">
-                        </div>
-                        <div id="adminUserList" class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">Alice Johnson</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">alice@example.com</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Attendee</td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                                            <button class="text-orange-600 hover:text-orange-900 mr-3">Suspend</button>
-                                            <button class="text-red-600 hover:text-red-900">Delete</button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                            </table>
-                        </div>
-                    </section>
-                `;
-                 // You would fetch all users here and populate the table
-                // fetch(`${API_BASE_URL}/admin/users`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
-            } else if (section === 'categories') {
-                 contentArea.innerHTML = `
-                    <section class="bg-white p-6 rounded-xl shadow-md">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Event Categories</h2>
-                        <div class="mb-4 flex gap-4">
-                            <input type="text" id="newCategoryName" placeholder="New Category Name" class="flex-grow px-3 py-2 border rounded-md">
-                            <button class="gradient-button text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">Add Category</button>
-                        </div>
-                        <ul id="categoryList" class="space-y-2">
-                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm">
-                                <span class="text-gray-700 font-medium">Technology (34 events)</span>
-                                <div>
-                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
-                                </div>
-                            </li>
-                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm">
-                                <span class="text-gray-700 font-medium">Music (18 events)</span>
-                                <div>
-                                    <button class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
-                                </div>
-                            </li>
-                        </ul>
-                    </section>
-                `;
-                 // You would fetch categories here and populate the list
-                // fetch(`${API_BASE_URL}/admin/categories`, { headers: { 'Authorization': 'Bearer ADMIN_TOKEN' } })
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
-            // Add more else if blocks for other sections
+
+            const data = await response.json();
+            alert(data.message);
+            // Refresh the events list after a successful update
+            loadSectionContent('events');
+
+        } catch (error) {
+            console.error(`Error updating event status:`, error);
+            alert(`Failed to update event status: ${error.message}`);
         }
+    }
 
-        // Load default section on page load
-        loadSectionContent('overview');
+    async function approveEvent(eventId) {
+        if (confirm('Are you sure you want to approve this event?')) {
+            updateEventStatus(eventId, 'approve');
+        }
+    }
 
-    </script>
+    async function declineEvent(eventId) {
+        if (confirm('Are you sure you want to decline this event?')) {
+            updateEventStatus(eventId, 'decline');
+        }
+    }
+
+    // Function to dynamically load content and fetch data
+    async function loadSectionContent(section) {
+        contentArea.innerHTML = '';
+
+        if (section === 'overview') {
+            contentArea.innerHTML = `
+                <section id="dashboard-stats-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-700">Total Events</h3>
+                            <p class="text-3xl font-bold text-gray-900" id="totalEventsCount">...</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
+                            <p class="text-3xl font-bold text-gray-900" id="totalUsersCount">...</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex items-center">
+                        <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
+                            <i class="fas fa-ticket-alt fa-2x"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-700">Total Registrations</h3>
+                            <p class="text-3xl font-bold text-gray-900" id="totalRegistrationsCount">...</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="bg-white p-6 rounded-xl shadow-md mt-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Activity</h2>
+                    <ul id="recentActivityList" class="space-y-3 text-gray-700">
+                        <li>Fetching recent activity...</li>
+                    </ul>
+                </section>
+            `;
+
+            // Fetch dashboard stats (existing code)
+            fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminToken}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('totalEventsCount').textContent = data.events;
+                document.getElementById('totalUsersCount').textContent = data.users;
+                document.getElementById('totalRegistrationsCount').textContent = data.registrations;
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard stats:', error);
+                alert('Error fetching dashboard stats. Check the console for details.');
+            });
+
+            // Fetch recent activity data
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/recent-activity`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const recentActivityList = document.getElementById('recentActivityList');
+                recentActivityList.innerHTML = ''; // Clear the "Fetching..." message
+
+                if (data.events.length === 0 && data.users.length === 0) {
+                    recentActivityList.innerHTML = '<li>No recent activity found.</li>';
+                } else {
+                    data.events.forEach(event => {
+                        const date = new Date(event.createdAt).toLocaleString();
+                        recentActivityList.innerHTML += `<li><i class="fas fa-calendar-plus text-indigo-500 mr-2"></i> New event created: <strong>${event.title}</strong> on ${date}</li>`;
+                    });
+                    data.users.forEach(user => {
+                        const date = new Date(user.createdAt).toLocaleString();
+                        recentActivityList.innerHTML += `<li><i class="fas fa-user-plus text-green-500 mr-2"></i> New user signed up: <strong>${user.email}</strong> on ${date}</li>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching recent activity:', error);
+                const recentActivityList = document.getElementById('recentActivityList');
+                recentActivityList.innerHTML = `<li>Error fetching recent activity. See console for details.</li>`;
+            }
+
+        } else if (section === 'events') {
+            contentArea.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Event Management</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organizer</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading events...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            // Fetch events
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/events`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const events = await response.json();
+                const tableBody = document.getElementById('eventsTableBody');
+                tableBody.innerHTML = '';
+                if (events.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">No events found.</td></tr>';
+                } else {
+                    events.forEach(event => {
+                        const date = new Date(event.date).toLocaleDateString();
+                        
+                        let statusBadge;
+                        let actionsButtons;
+
+                        switch (event.status) {
+                            case 'pending':
+                                statusBadge = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+                                actionsButtons = `
+                                    <button onclick="approveEvent('${event._id}')" class="text-green-600 hover:text-green-900 mr-2">Approve</button>
+                                    <button onclick="declineEvent('${event._id}')" class="text-red-600 hover:text-red-900">Decline</button>
+                                `;
+                                break;
+                            case 'approved':
+                                statusBadge = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>`;
+                                actionsButtons = `<span class="text-gray-500">N/A</span>`;
+                                break;
+                            case 'declined':
+                                statusBadge = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Declined</span>`;
+                                actionsButtons = `<span class="text-gray-500">N/A</span>`;
+                                break;
+                            default:
+                                statusBadge = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Unknown</span>`;
+                                actionsButtons = `<span class="text-gray-500">N/A</span>`;
+                        }
+
+                        tableBody.innerHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">${event.title}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${event.organizer ? event.organizer.username : 'N/A'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    ${actionsButtons}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                document.getElementById('eventsTableBody').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Failed to load events.</td></tr>';
+            }
+
+        } else if (section === 'users') {
+            contentArea.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">User Management</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            // Fetch users
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const users = await response.json();
+                const tableBody = document.getElementById('usersTableBody');
+                tableBody.innerHTML = '';
+                if (users.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">No users found.</td></tr>';
+                } else {
+                    users.forEach(user => {
+                        const date = new Date(user.createdAt).toLocaleDateString();
+                        tableBody.innerHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">${user.username}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${user.email}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-500">Failed to load users.</td></tr>';
+            }
+
+        } else if (section === 'categories') {
+            contentArea.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Category Management</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="2" class="p-4 text-center text-gray-500">Loading categories...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            // Fetch categories
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const categories = await response.json();
+                const tableBody = document.getElementById('categoriesTableBody');
+                tableBody.innerHTML = '';
+                if (categories.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-500">No categories found.</td></tr>';
+                } else {
+                    categories.forEach(category => {
+                        tableBody.innerHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">${category.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                document.getElementById('categoriesTableBody').innerHTML = '<tr><td colspan="2" class="p-4 text-center text-red-500">Failed to load categories.</td></tr>';
+            }
+        }
+    }
+    
+    // Load the dashboard content on page load
+    loadSectionContent('overview');
+</script>
 </body>
 </html>

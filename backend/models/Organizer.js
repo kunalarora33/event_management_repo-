@@ -12,6 +12,11 @@ const OrganizerSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    role: {
+        type: String,
+        enum: ['organizer', 'admin'], // <-- NEW: Defines possible roles
+        default: 'organizer'          // <-- NEW: Sets a default role for all new accounts
     }
 });
 

@@ -8,18 +8,18 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; 
+            background-color: #f3f4f6;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
         .gradient-button {
-            background-image: linear-gradient(to right, #6366f1, #8b5cf6); 
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
             transition: background-image 0.3s ease-in-out;
         }
         .gradient-button:hover {
-            background-image: linear-gradient(to right, #8b5cf6, #6366f1); 
+            background-image: linear-gradient(to right, #8b5cf6, #6366f1);
         }
     </style>
 </head>
@@ -31,12 +31,12 @@
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <input type="text" id="username" name="username" required
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <input type="password" id="password" name="password" required
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
                 <button type="submit"
                         class="w-full gradient-button text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75">
@@ -51,24 +51,39 @@
     </div>
 
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); 
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const loginMessage = document.getElementById('loginMessage');
+            loginMessage.classList.add('hidden'); 
 
-            
-            const ADMIN_USERNAME = 'admin';
-            const ADMIN_PASSWORD = 'password123';
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
 
-            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                
-                alert('Admin Login Successful! Redirecting to dashboard...');
-                
-                window.location.href = 'second.html';
-            } else {
-                loginMessage.textContent = 'Invalid username or password.';
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Correctly save the token to localStorage with a specific admin key
+                    localStorage.setItem('adminToken', data.token);
+
+                    alert('Admin Login Successful! Redirecting to dashboard...');
+                    window.location.href = 'second.html';
+                } else {
+                    const errorData = await response.json();
+                    loginMessage.textContent = errorData.message || 'Invalid username or password.';
+                    loginMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+                loginMessage.textContent = 'Server error during login. Please try again later.';
                 loginMessage.classList.remove('hidden');
             }
         });

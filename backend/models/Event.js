@@ -8,12 +8,11 @@ const EventSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        // If you want it required: true, otherwise keep false or remove the line
-        required: true, // Changed from false to true based on the second definition
+        required: true,
         trim: true
     },
     date: {
-        type: Date, // Consider changing to Date type for better date manipulation and queries
+        type: Date,
         required: true
     },
     time: {
@@ -25,11 +24,11 @@ const EventSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    category: { // Added from the second definition
+    category: {
         type: String,
         required: true
     },
-    imageUrl: { // Added from the second definition
+    imageUrl: {
         type: String,
         default: ''
     },
@@ -38,17 +37,21 @@ const EventSchema = new mongoose.Schema({
         ref: 'Organizer',
         required: true
     },
-    fee: { // Added from the second definition
+    fee: {
         type: Number,
         default: 0,
-        min: 0 // Ensure fee cannot be negative
+        min: 0
     },
-    attendees: [{ // Added from the second definition
+    attendees: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'declined'],
+        default: 'pending'
+    }
 }, {
-    // Keep timestamps: true for createdAt and updatedAt fields
     timestamps: true
 });
 
