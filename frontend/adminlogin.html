@@ -71,7 +71,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     
-                    // Correctly save the token to localStorage with a specific admin key
+                    
                     localStorage.setItem('adminToken', data.token);
 
                     alert('Admin Login Successful! Redirecting to dashboard...');
